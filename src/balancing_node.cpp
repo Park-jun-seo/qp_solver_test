@@ -27,7 +27,8 @@ public:
                                                                       std::bind(&BalanceNode::WheelSubscriber, this, std::placeholders::_1));
         timer_ = this->create_wall_timer(std::chrono::milliseconds(int(deltaTime * 1000)), std::bind(&BalanceNode::Publisher, this));
         r = 0.06;
-        bufferSize = 50;
+        bufferSize = 10;
+        i_pitch = 0;
         buffer.resize(bufferSize);
     }
 
@@ -46,15 +47,12 @@ private:
         double y = msg->orientation.y;
         double z = msg->orientation.z;
         double w = msg->orientation.w;
-
         // Calculating pitch in radians
         double t2 = +2.0 * (w * y - z * x);
-        t2 = std::max(-1.0, std::min(+1.0, t2)); // Ensure t2 is within [-1.0, +1.0]
-        pitch = std::asin(t2);                   //*180/M_PI;
-        // printf("pitch = %e;\n", pitch);
+        t2 = std::max(-1.0, std::min(+1.0, t2)); 
+        pitch = std::asin(t2);                 
         std::cout << std::fixed;
         std::cout.precision(2);
-        // std::cout << "pitch = " << pitch*180/M_PI << std::endl;
         dot_pitch = msg->angular_velocity.y;
     }
     void WheelSubscriber(const std_msgs::msg::Float64::SharedPtr msg)
@@ -63,19 +61,19 @@ private:
     }
     void Calculator()
     {
+        i_pitch = i_pitch+ pitch;
+        // H: 목적 함수의 2차 항
+        real_t H[1 * 1] = {1}; // 1차원 문제
 
-        // H: 목적 함수의 2차 항을 정의하는 행렬 (여기서는 단순화된 예제)
-        real_t H[1 * 1] = {0.01}; // 1차원 문제
-
-        real_t g[1] = {-pitch * 10 - dot_pitch * 2}; // 가중치 조정된 예제
+        real_t g[1] = {-pitch * 5 - dot_pitch * 10}; // 가중치 조정된 예제
 
         // 변수의 하한과 상한
-        real_t lb[1] = {-fabs(0.5 * pitch)}; // 최대 토크 제한
-        real_t ub[1] = {fabs(0.5 * pitch)};  // 최대 토크 제한
-        real_t A[1] = {0.};
-        real_t lbA[1] = {0};
-        real_t ubA[1] = {0};
-        // QProblemB 객체 생성 (1차원 문제)
+        real_t lb[1] = {-fabs(0.7 * (pitch))+i_pitch*0.005}; // 최대 토크 제한
+        real_t ub[1] = {fabs(0.7 * (pitch))+i_pitch*0.005};  // 최대 토크 제한
+        real_t A[1] = {1.};
+        real_t lbA[1] = {-1};
+        real_t ubA[1] = {1};
+        // QProblemB 객체 생성
         QProblem example(1, 1);
 
         Options options;
@@ -95,9 +93,9 @@ private:
         std::cout.precision(2);
 
         // std::cout << "getObjVal torque = " << example.getObjVal() << std::endl;
-        crtl = xOpt[0] / r * 0.8 * 2;
+        crtl = xOpt[0] / r * 0.8; // 가속도 = 토크 / 거리 * 질량
         dot_x = r * wheel_ang;
-        crtl = (crtl * deltaTime) / r;
+        crtl = (crtl * deltaTime) / r; // 각속도 = 속도 / 거리
         std::cout << "Optimal torque = " << xOpt[0] << " crtl velocity = " << crtl << "  pitch = " << pitch << "  dot_x = " << dot_x << std::endl;
     }
     float simpleMovingAverage(float newCrtl)
@@ -121,11 +119,11 @@ private:
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr foward_wheel_publisher;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub;
     rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr wheel_sub;
-    double pitch, dot_pitch, dot_x, crtl, deltaTime, wheel_ang,r;
-    std::vector<float> buffer; // 동적 배열로 선언
-    int bufferSize; // 버퍼의 크기
-    int index = 0; // 현재 데이터를 삽입할 배열의 인덱스
-    int count = 0; // 배열에 저장된 데이터의 수
+    double pitch, dot_pitch, dot_x, crtl, deltaTime, wheel_ang,r,i_pitch;
+    std::vector<float> buffer;
+    int bufferSize;
+    int index = 0;
+    int count = 0;
 };
 
 int main(int argc, char *argv[])

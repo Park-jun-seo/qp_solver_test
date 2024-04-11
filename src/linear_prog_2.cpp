@@ -45,7 +45,7 @@ int main( )
 
 	real_t A[2*2] = { 1.0, 1.0 ,
 					  2.0/3.0, 3};
-	real_t g[2] = { -1*5/3.0, -1.0 };
+	real_t g[2] = { -5.0/3.0, -1.0 };
 	real_t lb[2] = { 0.0 , 0.0 };
 	real_t ub[2] = { INFTY, INFTY };
 	real_t lbA[2] = { -INFTY, -INFTY };

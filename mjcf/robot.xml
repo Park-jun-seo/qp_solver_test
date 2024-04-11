@@ -20,27 +20,27 @@
 
         <body name="body" pos="0 0 0.2">
             <body name="main_body" pos="0 0 0.05">
-                <geom type="sphere" size="0.05" mass="0.0001" />
+                <geom type="sphere" size="0.05" mass="0.0001"  contype="0" conaffinity="0"/>
                 <site name="imu" size="0.01" pos="0 0 0.0" />
             </body>
 
             <freejoint />
             <body name="l_leg" pos="0 0.045 -0.02" euler="-3.141592 0 0">
                 <body name="l_wheel" pos="0 -0.005 0.06" euler="1.570796 0 0">
-                    <geom type="cylinder" size="0.06 0.04" mass="5.0" />
+                    <geom type="cylinder" size="0.06 0.04" mass="0.4" friction="1 0.004 0.004"/>
                     <joint name="joint_left_wheel" class="wheel" />
                 </body>
             </body>
             <body
                 name="r_leg" pos="0 -0.045 -0.02" euler="-3.141592 0 3.141592">
                 <body name="r_wheel" pos="0 -0.005 0.06" euler="-1.570796 0 0">
-                    <geom type="cylinder" size="0.06 0.04" mass="5.0" />
+                    <geom type="cylinder" size="0.06 0.04" mass="0.4" friction="1 0.004 0.004"/>
                     <joint name="joint_right_wheel" class="wheel" />
                 </body>
             </body>
             <body
                 name="face" pos="0.055 0 0.09" euler="0.0 0.872665 0">
-                <geom type="cylinder" size="0.065 0.01" mass="0" material="edie8_face" />
+                <geom type="cylinder" size="0.065 0.01" mass="0" material="edie8_face"  contype="0" conaffinity="0" />
             </body>
         </body>
 

@@ -43,23 +43,6 @@ int main( )
 
 	/* Setup data of first LP. */
     /*
-    min (1.5 * x_1 + 1 * x_2 ) 
-
-    subject
-    0.5 <= x_1 <=5.0
-    -2.0 <= x_2 <= 2.0
-    -1.0 <= x_1 + x_2 <=2.0
-    
-    */
-	real_t A[1*2] = { 1.0, 1.0 };
-	real_t g[2] = { 1.5, 1.0 };
-	real_t lb[2] = { 0.5, -2.0 };
-	real_t ub[2] = { 5.0, 2.0 };
-	real_t lbA[1] = { -1.0 };
-	real_t ubA[1] = { 2.0 };
-
-	/* Setup data of second LP. */
-    /*
     min (1.0 * x_1 + 1.5 * x_2 ) 
 
     subject
@@ -68,7 +51,23 @@ int main( )
     -2.0 <= x_1 + x_2 <=1.0
     
     */
-	real_t g_new[2] = { 1.0, 1.5 };
+	real_t A[1*2] = { 1.0, 1.0 };
+	real_t g[2] = { 1.0, 1.5};
+	real_t lb[2] = { 0.0, -10.0 };
+	real_t ub[2] = { 10.0, 0.5 };
+	real_t lbA[1] = { -2.0 };
+	real_t ubA[1] = { 1.0 };
+
+	/* Setup data of second LP. */
+    /*
+    min (1.5 * x_1 + 1.5 * x_2 ) 
+
+    subject
+    0.0 <= x_1 <=10.0
+    -10.0 <= x_2 <= 0.5
+    -2.0 <= x_1 + x_2 <=1.0
+    */
+	real_t g_new[2] = { 1.5, 1.5 };
 	real_t lb_new[2] = { 0.0, -10.0 };
 	real_t ub_new[2] = { 10.0, 0.5 };
 	real_t lbA_new[1] = { -2.0 };
@@ -85,15 +84,16 @@ int main( )
 
 	/* Solve first LP. */
 	int_t nWSR = 10;
+	real_t xOpt[2];
 	example.init( 0,g,A,lb,ub,lbA,ubA, nWSR,0 );
 
 	/* Solve second LP. */
 	nWSR = 10;
+	example.getPrimalSolution( xOpt );
+	printf( "\nxOpt = [ %e, %e ];  objVal = %e\n\n", xOpt[0],xOpt[1],example.getObjVal() );
+	
 	example.hotstart( g_new,lb_new,ub_new,lbA_new,ubA_new, nWSR,0 );
-
-
 	/* Get and print solution of second LP. */
-	real_t xOpt[2];
 	example.getPrimalSolution( xOpt );
 	printf( "\nxOpt = [ %e, %e ];  objVal = %e\n\n", xOpt[0],xOpt[1],example.getObjVal() );
 
